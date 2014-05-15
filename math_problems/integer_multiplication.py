@@ -4,7 +4,8 @@
 def multiple(a, b):
     """
     Naive implementation of decimal integer multiplication.
-    It runs O(2N*N).
+    It runs ~O(2N*M), where N = len(a) and M = len(b).
+    This algorithm seems to be slow (it may run quadratic if N==M)
     """
     a, b = str(a), str(b)
     # intermediary results
@@ -42,4 +43,5 @@ def multiple(a, b):
 
 
 if __name__ == '__main__':
-    assert multiple(5678, 1234) == 7006652
+    assert multiple(5678, 1234) == 5678 * 1234
+    assert multiple(11, 11) == 11 * 11
