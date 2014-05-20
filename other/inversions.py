@@ -64,7 +64,6 @@ def _merge(left, right):
     return sorted_list, invs
 
 
-
 if __name__ == '__main__':
     x = [1, 3, 5, 7, 9, 11, 2, 4, 6, 8, 10]
     assert len(list(inversions(x))) == 15
