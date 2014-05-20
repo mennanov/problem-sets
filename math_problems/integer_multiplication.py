@@ -64,11 +64,9 @@ def multiple_karatsuba(x, y):
     step3 = multiple_karatsuba((a + b), (c + d))
     step4 = step3 - step2 - step1
     # get the longest input length
-    m = max(len(x), len(y))/2
+    m = max(len(x), len(y)) / 2
     # perform addition
-    return step1 * (10 ** (m*2)) + step2 + step4 * (10 ** m)
-
-
+    return step1 * (10 ** (m * 2)) + step2 + step4 * (10 ** m)
 
 
 if __name__ == '__main__':
