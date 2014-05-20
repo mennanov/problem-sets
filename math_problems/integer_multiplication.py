@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import math
 
 
 def multiple(a, b):
@@ -42,6 +43,35 @@ def multiple(a, b):
     return int(''.join([str(x) for x in sum_row]))
 
 
+def multiple_karatsuba(x, y):
+    """
+    Recursive divide&conquer algorithm for integer multiplication for base 10.
+    It runs O(N**Log3) which is faster than O(N**2) as in naive approach.
+    """
+    if x < 10 or y < 10:
+        # this is a tail of the recursion:
+        # integers are simple enough to perform a regular multiplication
+        return x * y
+
+    # convert to string to use Python slicing
+    x, y = str(x), str(y)
+    # divide the both integers in to half (ceil is for the odd numbers)
+    a, b = int(x[:int(math.ceil(len(x) / 2.0))]), int(x[int(math.ceil(len(x) / 2.0)):])
+    c, d = int(y[:int(math.ceil(len(y) / 2.0))]), int(y[int(math.ceil(len(y) / 2.0)):])
+    # perform arithmetic steps
+    step1 = multiple_karatsuba(a, c)
+    step2 = multiple_karatsuba(b, d)
+    step3 = multiple_karatsuba((a + b), (c + d))
+    step4 = step3 - step2 - step1
+    # get the longest input length
+    m = max(len(x), len(y))/2
+    # perform addition
+    return step1 * (10 ** (m*2)) + step2 + step4 * (10 ** m)
+
+
+
+
 if __name__ == '__main__':
     assert multiple(5678, 1234) == 5678 * 1234
     assert multiple(11, 11) == 11 * 11
+    assert multiple_karatsuba(5678, 1234) == 5678 * 1234
