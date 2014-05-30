@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from random import shuffle
 
 
 class Graph(object):
@@ -28,8 +29,6 @@ class Graph(object):
         tries = self.vertices * (self.vertices - 1) / 2
         min_cut = float('inf')
         # execute the min cut routine 'tries' times and choose the best min cut
-        from collections import defaultdict
-        self.count = defaultdict(int)
         for _ in xrange(tries):
             # create a copy of edges list (deepcopy() is too slow)
             edges = []
@@ -37,7 +36,6 @@ class Graph(object):
                 edges.append(e[:])
             shuffle(edges)
             m = self._min_cut(edges, self.vertices)
-            self.count[m] += 1
             if m < min_cut:
                 min_cut = m
         return min_cut
@@ -80,26 +78,8 @@ def _build_edges(vertices):
                 edges.append(a)
     return edges
 
+
 if __name__ == '__main__':
-    from random import shuffle
-    # v = [(1, [2, 3, 4, 7]), (2, [1, 3, 4]), (3, [1, 2, 4]), (4, [1, 2, 3, 5]), (5, [4, 6, 7, 8]), (6, [5, 7, 8]),
-    #      (7, [1, 5, 6, 8]),
-    #      (8, [5, 6, 7])]
-    # shuffle each adjacent list
-    # for n, l in v:
-    #     shuffle(l)
-    # # shuffle vertices
-    # shuffle(v)
-    # vertices = dict([(1, [3, 2]), (3, [1, 2, 4]), (2, [1, 3, 4]), (4, [2, 3])])
-    vertices = dict()
-    with open('kargerMinCut.txt', 'r') as fp:
-        while True:
-            line = fp.readline()
-            if line:
-                nums = line.split()
-                vertices[nums[0]] = nums[1:]
-            else:
-                break
+    vertices = dict([(1, [3, 2]), (3, [1, 2, 4]), (2, [1, 3, 4]), (4, [2, 3])])
     graph = Graph(vertices)
-    print graph.min_cut()
-    print graph.count
+    assert graph.min_cut() == 2
