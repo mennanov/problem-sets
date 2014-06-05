@@ -65,3 +65,22 @@ class Graph(object):
 
     def __reversed__(self):
         return reversed(self.vertices)
+
+
+class EdgeWeightedGraph(Graph):
+
+    def add_edge(self, name1, name2, weight):
+        try:
+            vertex1 = self[name1]
+        except KeyError:
+            # create new vertex
+            vertex1 = Vertex(name1)
+            self[name1] = vertex1
+        try:
+            vertex2 = self[name2]
+        except KeyError:
+            # create new vertex
+            vertex2 = Vertex(name2)
+            self[name2] = vertex2
+        vertex1.outgoing.append((vertex2, weight))
+        vertex2.incoming.append((vertex1, weight))
