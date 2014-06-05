@@ -78,6 +78,48 @@ class FindPathDP(object):
             paths.append(c)
         return choose(paths)
 
+
+class FindPathBF(object):
+    """
+    Exploring the shortest path with a brute force approach.
+    We find all the possible paths and choose the best one of them.
+    """
+
+    def __init__(self, graph, start):
+        self.graph = graph
+        self.start = start
+
+    def shortest_path(self, to):
+        """
+        Shortest path. We use the 'min' function to compare paths
+        """
+        return min(self._dfs(to, float('inf')))
+
+    def longest_path(self, to):
+        """
+        Longest path. We use the 'max' function to compare paths
+        """
+        return max(self._dfs(to, float('-inf')))
+
+    def _dfs(self, to, inf):
+        """
+        Simplified depth-first search without marking vertices as 'visited'
+        Iterate over vertices in a reversed order (backward edges)
+        """
+        if to == self.start:
+            # reached the starting point
+            return [Path()]
+        if not self.graph[to].incoming:
+            # the last vertex, no where to go - it is a wrong way
+            return [Path(inf)]
+        paths = []
+        for v, weight in self.graph[to].incoming:
+            for c in self._dfs(v.name, inf):
+                c.add(to, weight)
+                paths.append(c)
+        return paths
+
+
 if __name__ == '__main__':
     graph = EdgeWeightedGraph()
     edges = [('s', 'a', 1), ('s', 'c', 2), ('c', 'd', 3), ('c', 'a', 4), ('a', 'b', 6), ('b', 'd', 1), ('b', 'e', 2),
@@ -86,5 +128,8 @@ if __name__ == '__main__':
         graph.add_edge(edge[0], edge[1], edge[2])
 
     path = FindPathDP(graph, 's')
+    assert path.shortest_path('d').weight == 5
+    assert path.longest_path('d').weight == 13
+    path = FindPathBF(graph, 's')
     assert path.shortest_path('d').weight == 5
     assert path.longest_path('d').weight == 13
