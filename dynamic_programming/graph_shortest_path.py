@@ -28,11 +28,36 @@ class Path(object):
         else:
             return 0
 
+    def copy(self):
+        """
+        Create a deepcopy of the object
+        """
+        path = Path(self.weight)
+        for v, weight in self.edges:
+            path.edges.append((v, weight))
+        return path
+
     def __str__(self):
-        return str(self.edges)
+        return 'Path: {}'.format(str(self.edges))
 
     def __repr__(self):
-        return str(self.edges)
+        return 'Path({}) at {}'.format(str(self.weight), str(hex(id(self))))
+
+
+def memoize(func):
+    """
+    Simple memoization decorator (it does not handle kwargs since we don't need them)
+    """
+    cache = dict()
+
+    def wrapper(*args):
+        # omit 'self'
+        key = args[1:]
+        if key not in cache:
+            cache[key] = func(*args)
+        return cache[key]
+
+    return wrapper
 
 
 class FindPathDP(object):
@@ -58,9 +83,11 @@ class FindPathDP(object):
         """
         return self._dfs(to, max)
 
+    @memoize
     def _dfs(self, to, choose):
         """
-        Simplified depth-first search without marking vertices as 'visited'
+        Simplified depth-first search without marking vertices as 'visited'.
+        Instead of marking vertices as visited we save already known paths by using @memoize decorator.
         Iterate over vertices in a reversed order (backward edges)
         """
         if to == self.start:
@@ -73,7 +100,9 @@ class FindPathDP(object):
             return Path(s[0])
         paths = []
         for v, weight in self.graph[to].incoming:
-            c = self._dfs(v.name, choose)
+            # need to create a copy of that path since we don't want to modify it.
+            # This is very important if we use memoize decorator since it stores all the paths in a dictionary
+            c = self._dfs(v.name, choose).copy()
             c.add(to, weight)
             paths.append(c)
         return choose(paths)
