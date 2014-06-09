@@ -66,6 +66,9 @@ class Graph(object):
     def __reversed__(self):
         return reversed(self.vertices)
 
+    def __str__(self):
+        return str(self.vertices)
+
 
 class EdgeWeightedGraph(Graph):
 

@@ -28,6 +28,9 @@ class Path(object):
         else:
             return 0
 
+    def __iter__(self):
+        return iter(self.edges)
+
     def copy(self):
         """
         Create a deepcopy of the object
@@ -51,11 +54,9 @@ def memoize(func):
     cache = dict()
 
     def wrapper(*args):
-        # omit 'self'
-        key = args[1:]
-        if key not in cache:
-            cache[key] = func(*args)
-        return cache[key]
+        if args not in cache:
+            cache[args] = func(*args)
+        return cache[args]
 
     return wrapper
 
@@ -87,9 +88,14 @@ class FindPathDP(object):
     def _dfs(self, to, choose):
         """
         Simplified depth-first search without marking vertices as 'visited'.
-        Instead of marking vertices as visited we save already known paths by using @memoize decorator.
+        Instead of marking vertices as visited we save already known paths by using @memoize decorator,
+        it requires some extra memory but it is totally worth it.
+        The running time in that case is O(E) where E is a number of edges in a DAG.
+        If we don't use a @memoize decorator the algorithm will wind up in exponential time since we will
+        go through already explored paths again and again.
         Iterate over vertices in a reversed order (backward edges)
         """
+        # TODO: calculate the running time complexity for this algorithm
         if to == self.start:
             # reached the starting point
             return Path()
@@ -99,7 +105,13 @@ class FindPathDP(object):
             s.remove(choose(float('inf'), float('-inf')))
             return Path(s[0])
         paths = []
-        for v, weight in self.graph[to].incoming:
+        for vertex in self.graph[to].incoming:
+            # edge weighted graph has a tuple, a simple graph doesn't
+            if isinstance(vertex, tuple):
+                v, weight = vertex
+            else:
+                v = vertex
+                weight = 1
             # need to create a copy of that path since we don't want to modify it.
             # This is very important if we use memoize decorator since it stores all the paths in a dictionary
             c = self._dfs(v.name, choose).copy()
@@ -112,6 +124,7 @@ class FindPathBF(object):
     """
     Exploring the shortest path with a brute force approach.
     We find all the possible paths and choose the best one of them.
+    It has an exponential running time complexity.
     """
 
     def __init__(self, graph, start):
