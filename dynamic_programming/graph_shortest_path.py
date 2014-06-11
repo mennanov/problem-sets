@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from other.graph import EdgeWeightedGraph
+from other.graphs.graph import EdgeWeightedGraph
 
 
 class Path(object):

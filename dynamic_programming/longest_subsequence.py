@@ -5,7 +5,7 @@ Goal: find the longest increasing or decreasing inconsequent subsequence in a gi
 For example: in a given sequence [5, 2, 8, 6, 3, 6, 9, 7]
 the longest increasing subsequence is [2, 3, 6, 9]
 """
-from other.graph import Graph
+from other.graphs.graph import Graph
 from graph_shortest_path import FindPathDP, Path
 
 

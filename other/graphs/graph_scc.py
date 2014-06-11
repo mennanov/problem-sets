@@ -11,7 +11,7 @@ but ideally these recursive methods should be rewritten so that
 it would not use any recursion (the implementation is similar to breadth-first search, but instead
 of using queue you should use a stack), though the correct implementation is quite tricky.
 """
-from graph import Graph
+from other.graphs.graph import Graph
 
 
 class SCC(object):

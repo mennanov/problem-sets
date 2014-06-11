@@ -6,7 +6,7 @@ Graph API
 from collections import OrderedDict
 
 
-class Vertex(object):
+class SimpleVertex(object):
     """
     Graph vertex
     """
@@ -22,25 +22,44 @@ class Vertex(object):
         return u'Vertex({})'.format(repr(self.name))
 
 
+class Vertex(SimpleVertex):
+
+    def __init__(self, *args):
+        super(Vertex, self).__init__(*args)
+        # set the distance to infinity by default
+        self.distance = float('inf')
+        # what vertex can we get to that one from
+        self.prev = None
+
+    def __cmp__(self, other):
+        if self.distance > other.distance:
+            return 1
+        elif self.distance < other.distance:
+            return -1
+        else:
+            return 0
+
+
 class Graph(object):
     """
     Directed graph API
     """
-    def __init__(self):
+    def __init__(self, vertex_class=SimpleVertex):
         self.vertices = OrderedDict()
+        self.vertex_class = vertex_class
 
     def add_edge(self, name1, name2):
         try:
             vertex1 = self[name1]
         except KeyError:
             # create new vertex
-            vertex1 = Vertex(name1)
+            vertex1 = self.vertex_class(name1)
             self[name1] = vertex1
         try:
             vertex2 = self[name2]
         except KeyError:
             # create new vertex
-            vertex2 = Vertex(name2)
+            vertex2 = self.vertex_class(name2)
             self[name2] = vertex2
         vertex1.outgoing.append(vertex2)
         vertex2.incoming.append(vertex1)
@@ -55,7 +74,7 @@ class Graph(object):
         """
         Set vertex object by name
         """
-        if isinstance(value, Vertex):
+        if isinstance(value, self.vertex_class):
             self.vertices[key] = value
         else:
             raise ValueError(u'Item must be a Vertex object')
@@ -77,13 +96,13 @@ class EdgeWeightedGraph(Graph):
             vertex1 = self[name1]
         except KeyError:
             # create new vertex
-            vertex1 = Vertex(name1)
+            vertex1 = self.vertex_class(name1)
             self[name1] = vertex1
         try:
             vertex2 = self[name2]
         except KeyError:
             # create new vertex
-            vertex2 = Vertex(name2)
+            vertex2 = self.vertex_class(name2)
             self[name2] = vertex2
-        vertex1.outgoing.append((vertex2, weight))
-        vertex2.incoming.append((vertex1, weight))
+        vertex1.outgoing.append((vertex2, int(weight)))
+        vertex2.incoming.append((vertex1, int(weight)))
