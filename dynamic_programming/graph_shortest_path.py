@@ -90,12 +90,11 @@ class FindPathDP(object):
         Simplified depth-first search without marking vertices as 'visited'.
         Instead of marking vertices as visited we save already known paths by using @memoize decorator,
         it requires some extra memory but it is totally worth it.
-        The running time in that case is O(E) where E is a number of edges in a DAG.
+        The running time in that case is O(E + V) where E is a number of edges and V - vertices in a DAG.
         If we don't use a @memoize decorator the algorithm will wind up in exponential time since we will
         go through already explored paths again and again.
         Iterate over vertices in a reversed order (backward edges)
         """
-        # TODO: calculate the running time complexity for this algorithm
         if to == self.start:
             # reached the starting point
             return Path()
