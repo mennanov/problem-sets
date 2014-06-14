@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Two sum problem: in a given sequence of integers find two of them which sum will be 0.
+Three sum problem: in a given sequence of integers find three of them which sum will be 0.
 """
 
 
-def twosum_naive(seq):
+def threesum_naive(seq):
     """
-    Naive implementation: iterate over all pairs in a sequence and find pairs which sum is 0.
-    It will run O(N^2).
+    Naive implementation: iterate over all triplets in a sequence and find ones which sum is 0.
+    It will run O(N^3).
     """
     for i in xrange(len(seq)):
         for j in xrange(len(seq)):
