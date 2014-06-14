@@ -10,7 +10,7 @@ def twosum_naive(seq):
     It will run O(N^2).
     """
     for i in xrange(len(seq)):
-        for j in xrange(len(seq)):
+        for j in xrange(i + 1, len(seq)):
             if seq[i] + seq[j] == 0:
                 yield seq[i], seq[j]
 
@@ -40,7 +40,7 @@ def twosum_faster(seq):
 
     l = len(seq)
     for i in xrange(l):
-        j = bs(seq_srt, -seq_srt[i], 0, l - 1)
+        j = bs(seq_srt, -seq_srt[i], i + 1, l - 1)
         if j is not None:
             yield seq_srt[i], seq_srt[j]
 
@@ -54,8 +54,10 @@ def twosum_fastest(seq):
     s = set()
     for item in seq:
         s.add(item)
+    used = set()
     for i in s:
-        if -i in s:
+        if -i in s and i not in used:
+            used.add(-i)
             yield i, -i
 
 
@@ -64,6 +66,6 @@ if __name__ == '__main__':
 
     seq = range(-100, 100, 8)
     shuffle(seq)
-    assert len(list(twosum_naive(seq))) == 24
-    assert len(list(twosum_faster(seq))) == 24
-    assert len(list(twosum_fastest(seq))) == 24
+    assert len(list(twosum_naive(seq))) == 12
+    assert len(list(twosum_faster(seq))) == 12
+    assert len(list(twosum_fastest(seq))) == 12
