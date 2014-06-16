@@ -51,9 +51,7 @@ def twosum_fastest(seq):
     Then iterate over every item in the set and try to find the opposite one.
     This will run O(N).
     """
-    s = set()
-    for item in seq:
-        s.add(item)
+    s = set(seq)
     used = set()
     for i in s:
         if -i in s and i not in used:
