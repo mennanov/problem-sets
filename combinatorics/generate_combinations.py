@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from math import factorial
 
 
 def combinations_2k(items):
@@ -51,6 +50,8 @@ def combinations(items, length, start=0):
 
 
 if __name__ == '__main__':
+    from math import factorial
+
     seq = range(1, 5)
     n = len(seq)
     k = 2
