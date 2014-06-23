@@ -64,7 +64,7 @@ class Knapsack(object):
         return len(self.items)
 
     def __str__(self):
-        return '{}, {} pounds'.format(str(self.items), str(self.weight))
+        return '{}, {} pounds, ${}'.format(str(self.items), str(self.weight), str(self.value))
 
     def __cmp__(self, other):
         """
