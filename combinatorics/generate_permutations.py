@@ -26,7 +26,7 @@ def permutations_3k(items):
 
 def xpermutations(items, length, exclude=None):
     """
-    Recursively generate combinations of a given length.
+    Recursively generate permutations of a given length.
     """
     if exclude is None:
         exclude = set()
