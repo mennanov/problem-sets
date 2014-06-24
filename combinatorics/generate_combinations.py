@@ -3,7 +3,7 @@
 
 def combinations_2k(items):
     """
-    Generate 2-length combinations of a given sequence.
+    Generate 2-length combinations of a given sequence in lexicographic order.
     """
     l = len(items)
     for i in xrange(l - 1):
@@ -13,7 +13,7 @@ def combinations_2k(items):
 
 def combinations_3k(items):
     """
-    Generate 3-length combinations of a given sequence.
+    Generate 3-length combinations of a given sequence in lexicographic order.
     """
     l = len(items)
     for i in xrange(l - 2):
@@ -22,21 +22,21 @@ def combinations_3k(items):
                 yield items[i], items[j], items[k]
 
 
-def xcombinations(items, length, start=0):
+def xcombinations_lex(items, length, start=0):
     """
-    Recursively generate combinations of a given length.
+    Recursively generate combinations of a given length in lexicographic order.
     """
     if length == 0:
         yield ()
     else:
         for i in xrange(start, len(items) - length + 1):
-            for subcombination in xcombinations(items, length - 1, i + 1):
+            for subcombination in xcombinations_lex(items, length - 1, i + 1):
                 yield (items[i], ) + subcombination
 
 
-def combinations(items, length, start=0):
+def combinations_lex(items, length, start=0):
     """
-    Return all combinations as a list
+    Return all combinations in lexicographic order as a list
     """
     result = []
     if length == 1:
@@ -44,9 +44,46 @@ def combinations(items, length, start=0):
             result.append((items[i],))
     else:
         for i in xrange(start, len(items) - length + 1):
-            for subcombination in combinations(items, length - 1, i + 1):
+            for subcombination in combinations_lex(items, length - 1, i + 1):
                 result.append((items[i],) + subcombination)
     return result
+
+
+def xcombinations_lex_all(items):
+    """
+    Generate all possible 2^n - 1 combinations in lexicographic order.
+    """
+    for l in xrange(1, len(items) + 1):
+        for c in xcombinations_lex(items, l):
+            yield c
+
+
+def xcombinations_bin(items):
+    """
+    Generate all possible 2^n - 1 combinations using binary counting.
+    """
+    for i in xrange(1, 2**len(items)):
+        combination = ()
+        # iterate over bits of this number
+        for pos, bit in enumerate((i >> p & 1 for p in xrange(i.bit_length()))):
+            if bit == 1:
+                combination += (items[pos],)
+        yield combination
+
+
+def xcombinations_gray(items):
+    """
+    Generate all possible 2^n - 1 combinations using Gray code.
+    """
+    for i in xrange(1, 2**len(items)):
+        combination = ()
+        # convert to Gray code
+        i ^= i >> 1
+        # iterate over bits of this number
+        for pos, bit in enumerate((i >> p & 1 for p in xrange(i.bit_length()))):
+            if bit == 1:
+                combination += (items[pos],)
+        yield combination
 
 
 if __name__ == '__main__':
@@ -58,5 +95,6 @@ if __name__ == '__main__':
     assert len(list(combinations_2k(seq))) == factorial(n) / (factorial(k) * factorial(n - k))
     k = 3
     assert len(list(combinations_3k(seq))) == factorial(n) / (factorial(k) * factorial(n - k))
-    assert len(list(xcombinations(seq, 3))) == len(list(combinations_3k(seq)))
-    assert len(combinations(seq, 3)) == len(list(combinations_3k(seq)))
+    assert len(list(xcombinations_lex(seq, 3))) == len(list(combinations_3k(seq)))
+    assert len(combinations_lex(seq, 3)) == len(list(combinations_3k(seq)))
+    assert set(list(xcombinations_bin(seq))) == set(list(xcombinations_gray(seq))) == set(list(xcombinations_lex_all(seq)))
