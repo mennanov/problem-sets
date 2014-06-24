@@ -5,10 +5,12 @@ During a robbery, a burglar finds much more loot than he had expected and has to
 His bag (or "knapsack") will hold a total weight of at most W pounds. There are n items to pick from.
 Each item has its own weight and a dollar value.
 What's the most valuable combination of items he can fit into his bag?
+Different approaches are analysed and compared here: http://micsymposium.org/mics_2005/papers/paper102.pdf
 """
 import heapq
 from collections import defaultdict
 from graph_shortest_path import memoize
+from combinatorics.generate_combinations import xcombinations_gray
 
 
 class Item(object):
@@ -135,26 +137,60 @@ class RobberyDP(object):
 class RobberyBF(object):
     """
     Knapsack without repetitions brute force algorithm.
-    It uses generation of combinations
-    (http://en.wikipedia.org/wiki/Combination)
-    So the overall running time of the algorithm is: O(N!)
+    It uses generation of 2^n combinations using a generator which must be provided
+    So the overall running time of the algorithm is: O(N*2^N)
     which is very slow and can not be used in practice.
     """
 
     def __init__(self, items):
         self.items = items
 
-    def _combinations(self, items, length, start=0):
+    def knapsack(self, weight, combinations_generator):
         """
-        Generate combinations without repetitions
+        Return the best possible knapsack for the given weight
         """
-        if length == 1:
-            for i in xrange(start, len(items)):
-                yield (items[i],)
-        else:
-            for i in xrange(start, len(items)):
-                for subcombination in self._combinations(items, length - 1, i + 1):
-                    yield (items[i],) + subcombination
+        # keep the best combination so far
+        best = Knapsack()
+        # iterate over all possible 2^N combinations
+        for combination in combinations_generator(self.items):
+            knapsack = Knapsack()
+            for item in combination:
+                knapsack.add(item)
+            if knapsack.weight <= weight and knapsack > best:
+                best = knapsack
+        return best
+
+
+class RobberyBB(object):
+    """
+    Knapsack without repetitions branch-and-bound algorithm.
+    It is an improvement over brute force search, because unlike it, branch and bound constructs
+    candidate solutions one component at a time and evaluates the partly constructed
+    solutions. If no potential values of the remaining components can lead to a solution, the
+    remaining components are not generated at all. This approach makes it possible to solve
+    some large instances of difficult combinatorial problems, though, in the worst case, it still
+    has an exponential complexity.
+    Overall running time of the algorithm in the worst case is still O(N*2^N)
+    but it surely beats brute-force approach and even sometimes dynamic programming approach when
+    the number of items is not huge.
+    """
+
+    def __init__(self, items):
+        self.items = items
+
+    def _combinations(self, items, constraint, partial_weight=0, prefix=(), start=0):
+        """
+        Generate combinations using prefixes which satisfy a given constraint
+        """
+        for i in xrange(start, len(items)):
+            item = items[i]
+            # use this combination if it satisfies a constraint
+            if partial_weight + item.weight <= constraint:
+                combination = prefix + (item,)
+                yield combination
+                if partial_weight + item.weight < constraint:
+                    for c in self._combinations(items, constraint, partial_weight + item.weight, combination, i + 1):
+                        yield c
 
     def knapsack(self, weight):
         """
@@ -162,15 +198,13 @@ class RobberyBF(object):
         """
         # keep the best combination so far
         best = Knapsack()
-        # generate combinations with length 1 to n
-        for length in xrange(1, len(self.items) + 1):
-            # generate all possible combinations for a given length
-            for combination in self._combinations(self.items, length):
-                knapsack = Knapsack()
-                for item in combination:
-                    knapsack.add(item)
-                if knapsack.weight <= weight and knapsack > best:
-                    best = knapsack
+        # iterate over all possible successful combinations (at most 2^N)
+        for combination in self._combinations(self.items, weight):
+            knapsack = Knapsack()
+            for item in combination:
+                knapsack.add(item)
+            if knapsack > best:
+                best = knapsack
         return best
 
 
@@ -185,19 +219,7 @@ class RobberyMIM(object):
     def __init__(self, items):
         self.items = items
 
-    def _combinations(self, items, lo, hi, length):
-        """
-        Generate combinations without repetitions
-        """
-        if length == 1:
-            for i in xrange(lo, hi):
-                yield (items[i],)
-        else:
-            for i in xrange(lo, hi):
-                for subcombination in self._combinations(items, i + 1, hi, length - 1):
-                    yield (items[i],) + subcombination
-
-    def knapsack(self, weight):
+    def knapsack(self, weight, combinations_generator):
         """
         Return the best possible knapsack for the given weight
         """
@@ -206,28 +228,25 @@ class RobberyMIM(object):
         # all possible knapsacks with the items from the left subset
         l_knapsacks = []
         # generate combinations for the left part
-        for length in xrange(1, n / 2 + 1):
-            # generate all possible combinations for a given length
-            for combination in self._combinations(self.items, 0, n / 2, length):
-                knapsack = Knapsack()
-                for item in combination:
-                    knapsack.add(item)
-                # if knapsack is not over-weighted
-                if knapsack.weight <= weight:
-                    l_knapsacks.append(knapsack)
+        for combination in combinations_generator(self.items[:n / 2]):
+            knapsack = Knapsack()
+            for item in combination:
+                knapsack.add(item)
+            # if knapsack is not over-weighted
+            if knapsack.weight <= weight:
+                l_knapsacks.append(knapsack)
         # store all the possible knapsacks for the right subset grouped by weight
         # maintaining max-oriented heap with knapsacks
         r_knapsacks = defaultdict(list)
         # generate combinations for the right part
-        for length in xrange(1, n / 2 + 1):
-            # generate all possible combinations for a given length
-            for combination in self._combinations(self.items, n / 2, n, length):
-                knapsack = Knapsack()
-                for item in combination:
-                    knapsack.add(item)
-                # if knapsack is not over-weighted
-                if knapsack.weight <= weight:
-                    heapq.heappush(r_knapsacks[knapsack.weight], (-knapsack.value, knapsack))
+        # generate all possible combinations for a given length
+        for combination in combinations_generator(self.items[n / 2:]):
+            knapsack = Knapsack()
+            for item in combination:
+                knapsack.add(item)
+            # if knapsack is not over-weighted
+            if knapsack.weight <= weight:
+                heapq.heappush(r_knapsacks[knapsack.weight], (-knapsack.value, knapsack))
         # keep the best combined knapsack so far
         best = Knapsack()
         # for every knapsack in the left subset try to find the best possible
@@ -236,14 +255,14 @@ class RobberyMIM(object):
             right_weight = weight - left.weight
             right = Knapsack()
             while right_weight > 0:
-                    right_heap = r_knapsacks[right_weight]
-                    # get the most valuable knapsack of the given weight
-                    if len(right_heap) > 0:
-                        right = right_heap[0][1]
-                        break
-                    else:
-                        # the perfect weighted knapsack was not found: decrease the weight and search again
-                        right_weight -= 1
+                right_heap = r_knapsacks[right_weight]
+                # get the most valuable knapsack of the given weight
+                if len(right_heap) > 0:
+                    right = right_heap[0][1]
+                    break
+                else:
+                    # the perfect weighted knapsack was not found: decrease the weight and search again
+                    right_weight -= 1
             # combine left and right knapsacks
             combined = left + right
             if combined > best:
@@ -256,8 +275,11 @@ if __name__ == '__main__':
     robbery = RobberyDP(items)
     bag1 = robbery.knapsack(10)
     robbery = RobberyBF(items)
-    bag2 = robbery.knapsack(10)
+    bag2 = robbery.knapsack(10, xcombinations_gray)
     assert all([i in bag2 for i in bag1]) and len(bag1) == len(bag2)
     robbery = RobberyMIM(items)
-    bag3 = robbery.knapsack(10)
+    bag3 = robbery.knapsack(10, xcombinations_gray)
     assert all([i in bag3 for i in bag2]) and len(bag2) == len(bag3)
+    robbery = RobberyBB(items)
+    bag4 = robbery.knapsack(10)
+    assert all([i in bag4 for i in bag3]) and len(bag3) == len(bag4)

@@ -122,8 +122,8 @@ class RobberyBF(object):
     Knapsack with repetitions brute force algorithm.
     It uses generation of multicombinations
     (http://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition)
-    So the overall running time of the algorithm is: O(min(weight) * sum(1 .. weight/min(weight), choose(n, k)))
-    which is nearly exponential and unbelievably slow, so, please, don't use it :)
+    So the overall running time of the algorithm is roughly: O(n!)
+    which is unbelievably slow, so, please, don't use it :)
     """
 
     def __init__(self, items):
