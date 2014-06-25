@@ -46,6 +46,9 @@ class Path(object):
     def __repr__(self):
         return 'Path({}) at {}'.format(str(self.weight), str(hex(id(self))))
 
+    def __eq__(self, other):
+        return self.edges == other.edges
+
 
 def memoize(func):
     """
