@@ -11,7 +11,6 @@ def longest_substring(string1, string2):
     The running time is O(mn).
     Bottom-up version with no recursion.
     """
-    # TODO: return substring instead of the length
     table = []
     for c in xrange(len(string1)):
         table.append([0] * (len(string2)))
@@ -29,8 +28,8 @@ def longest_substring(string1, string2):
                     # update the longest substring indexes so far
                     u = i
                     v = j
-    return table[u][v]
+    return string1[u - table[u][v] + 1:u + 1]
 
 
 if __name__ == '__main__':
-    assert longest_substring('ABABC', 'BABCA') == 4
+    assert longest_substring('SUBSEQUENCE', 'SUBEUENCS') == 'UENC'
