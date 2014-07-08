@@ -31,6 +31,9 @@ class Edge(object):
         self.vertex_from = vertex_from
         self.vertex_to = vertex_to
 
+    def __repr__(self):
+        return 'Edge({}, {})'.format(repr(self.vertex_from), repr(self.vertex_to))
+
 
 class EdgeWeighted(object):
     """
@@ -49,6 +52,9 @@ class EdgeWeighted(object):
             return -1
         else:
             return 0
+
+    def __repr__(self):
+        return 'Edge({}, {}, {})'.format(repr(self.vertex_from), repr(self.vertex_to), repr(self.weight))
 
 
 class Graph(object):
@@ -99,6 +105,9 @@ class Graph(object):
 
     def __str__(self):
         return str(self.vertices)
+
+    def __len__(self):
+        return len(self.vertices)
 
 
 class EdgeWeightedGraph(Graph):
