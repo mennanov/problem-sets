@@ -65,9 +65,9 @@ class SCC(object):
         """
         self.visited.add(vertex)
         # for every incoming vertex of that vertex
-        for v in self.graph[vertex.name].incoming:
-            if v not in self.visited:
-                self.rdfs(v)
+        for edge in self.graph[vertex.name].incoming:
+            if edge.vertex_from not in self.visited:
+                self.rdfs(edge.vertex_from)
         # add vertex to the order list
         self.order.append(vertex)
 
@@ -78,9 +78,9 @@ class SCC(object):
         self.visited.add(vertex)
         scc = []
         # for every incoming vertex of that vertex
-        for v in self.graph[vertex.name].outgoing:
-            if v not in self.visited:
-                scc += self.dfs(v)
+        for edge in self.graph[vertex.name].outgoing:
+            if edge.vertex_to not in self.visited:
+                scc += self.dfs(edge.vertex_to)
         # NOTE: if you only need to calculate the amount of vertices in SCC without actually
         # storing the vertices then set scc to 0 and change the next line to
         # return scc + 1

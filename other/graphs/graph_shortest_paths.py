@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from other.graphs.graph import EdgeWeightedGraph, Vertex
+from collections import defaultdict
+from other.graphs.graph import EdgeWeightedGraph
 
 
 class IndexedPriorityQueue(object):
@@ -93,27 +94,31 @@ class DijkstraSP(object):
         self.start = self.graph[start]
         # minimum priority queue
         self.pq = IndexedPriorityQueue()
-        self.start.distance = 0
-        # add starting vertex to the queue
-        self.pq[self.start.name] = self.start
+        # distances known so far
+        self.distance = defaultdict(lambda: float('inf'))
+        self.distance[self.start.name] = 0
+        # add starting vertex to the queue with 0 priority
+        self.pq[self.start.name] = (0, self.start)
+        # paths
+        self.prev = dict()
         while self.pq:
-            vertex = self.pq.get()
+            priority, vertex = self.pq.get()
             # relax all the outgoing adjacent vertices
-            for v, weight in vertex.outgoing:
-                self._relax(vertex, v, weight)
+            for edge in vertex.outgoing:
+                self._relax(vertex, edge.vertex_to, edge.weight)
 
     def _relax(self, v_from, v_to, weight):
         """
-        Update the distance to the vertex if it is better that we already know
+        Update the distance to the vertex if it is better than we already know
         """
-        if v_from.distance + weight < v_to.distance:
-            v_to.distance = v_from.distance + weight
-            v_to.prev = v_from
+        if self.distance[v_from.name] + weight < self.distance[v_to.name]:
+            self.distance[v_to.name] = self.distance[v_from.name] + weight
+            self.prev[v_to.name] = v_from
             # update the priority queue
-            self.pq[v_to.name] = v_to
+            self.pq[v_to.name] = (self.distance[v_to.name], v_to)
 
     def dist_to(self, v):
-        return self.graph[v].distance
+        return self.distance[v]
 
     def path_to(self, v):
         """
@@ -121,13 +126,13 @@ class DijkstraSP(object):
         """
         path = []
         while v != self.start.name:
-            path.append(self.graph[v].name)
-            v = self.graph[v].prev.name
+            path.append(self.graph[v])
+            v = self.prev[v.name].name
         return reversed(path)
 
 
 if __name__ == '__main__':
-    graph = EdgeWeightedGraph(Vertex)
+    graph = EdgeWeightedGraph()
     edges = [(1, 2, 7), (1, 3, 9), (1, 6, 14), (2, 1, 7), (2, 3, 10), (2, 4, 15), (3, 1, 9), (3, 2, 10), (3, 4, 11),
              (3, 6, 2), (4, 2, 15), (4, 3, 11), (4, 5, 6), (5, 4, 6), (5, 6, 9), (6, 1, 14), (6, 3, 2), (6, 5, 9)]
 

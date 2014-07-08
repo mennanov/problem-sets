@@ -6,7 +6,7 @@ Graph API
 from collections import OrderedDict
 
 
-class SimpleVertex(object):
+class Vertex(object):
     """
     Graph vertex
     """
@@ -22,19 +22,30 @@ class SimpleVertex(object):
         return u'Vertex({})'.format(repr(self.name))
 
 
-class Vertex(SimpleVertex):
+class Edge(object):
+    """
+    Graph edge with 2 vertices
+    """
 
-    def __init__(self, *args):
-        super(Vertex, self).__init__(*args)
-        # set the distance to infinity by default
-        self.distance = float('inf')
-        # what vertex can we get to that one from
-        self.prev = None
+    def __init__(self, vertex_from, vertex_to):
+        self.vertex_from = vertex_from
+        self.vertex_to = vertex_to
+
+
+class EdgeWeighted(object):
+    """
+    Graph weighted edge with 2 vertices and weight
+    """
+
+    def __init__(self, vertex_from, vertex_to, weight):
+        self.vertex_from = vertex_from
+        self.vertex_to = vertex_to
+        self.weight = weight
 
     def __cmp__(self, other):
-        if self.distance > other.distance:
+        if self.weight > other.weight:
             return 1
-        elif self.distance < other.distance:
+        elif self.weight < other.weight:
             return -1
         else:
             return 0
@@ -44,7 +55,7 @@ class Graph(object):
     """
     Directed graph API
     """
-    def __init__(self, vertex_class=SimpleVertex):
+    def __init__(self, vertex_class=Vertex):
         self.vertices = OrderedDict()
         self.vertex_class = vertex_class
 
@@ -61,8 +72,9 @@ class Graph(object):
             # create new vertex
             vertex2 = self.vertex_class(name2)
             self[name2] = vertex2
-        vertex1.outgoing.append(vertex2)
-        vertex2.incoming.append(vertex1)
+        edge = Edge(vertex1, vertex2)
+        vertex1.outgoing.append(edge)
+        vertex2.incoming.append(edge)
 
     def __getitem__(self, vertex_name):
         """
@@ -104,5 +116,6 @@ class EdgeWeightedGraph(Graph):
             # create new vertex
             vertex2 = self.vertex_class(name2)
             self[name2] = vertex2
-        vertex1.outgoing.append((vertex2, int(weight)))
-        vertex2.incoming.append((vertex1, int(weight)))
+        edge = EdgeWeighted(vertex1, vertex2, weight)
+        vertex1.outgoing.append(edge)
+        vertex2.incoming.append(edge)

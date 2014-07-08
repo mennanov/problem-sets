@@ -92,7 +92,7 @@ class FindPathDP(object):
         """
         Simplified depth-first search without marking vertices as 'visited'.
         Instead of marking vertices as visited we save already known paths by using @memoize decorator,
-        it requires some extra memory but it is totally worth it.
+        it requires extra O(V) memory but it is totally worth it.
         The running time in that case is O(E + V) where E is a number of edges and V - vertices in a DAG.
         If we don't use a @memoize decorator the algorithm will wind up in exponential time since we will
         go through already explored paths again and again.
@@ -107,17 +107,11 @@ class FindPathDP(object):
             s.remove(choose(float('inf'), float('-inf')))
             return Path(s[0])
         paths = []
-        for vertex in self.graph[to].incoming:
-            # edge weighted graph has a tuple, a simple graph doesn't
-            if isinstance(vertex, tuple):
-                v, weight = vertex
-            else:
-                v = vertex
-                weight = 1
+        for edge in self.graph[to].incoming:
             # need to create a copy of that path since we don't want to modify it.
             # This is very important if we use memoize decorator since it stores all the paths in a dictionary
-            c = self._dfs(v.name, choose).copy()
-            c.add(to, weight)
+            c = self._dfs(edge.vertex_from.name, choose).copy()
+            c.add(to, edge.weight)
             paths.append(c)
         return choose(paths)
 
@@ -157,9 +151,9 @@ class FindPathBF(object):
             # the last vertex, no where to go - it is a wrong way
             return [Path(inf)]
         paths = []
-        for v, weight in self.graph[to].incoming:
-            for c in self._dfs(v.name, inf):
-                c.add(to, weight)
+        for edge in self.graph[to].incoming:
+            for c in self._dfs(edge.vertex_from.name, inf):
+                c.add(to, edge.weight)
                 paths.append(c)
         return paths
 
