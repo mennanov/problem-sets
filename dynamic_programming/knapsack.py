@@ -37,7 +37,8 @@ class Item(object):
         elif self.weight > other.weight:
             return 1
         else:
-            return 0
+            # if weight is the same - give the most valuable item
+            return cmp(self.value, other.value)
 
 
 class Knapsack(object):
