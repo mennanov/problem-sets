@@ -62,7 +62,7 @@ def xcombinations_bin(items):
     """
     Generate all possible 2^n - 1 combinations using binary counting.
     """
-    for i in xrange(1, 2**len(items)):
+    for i in xrange(1, 2 ** len(items)):
         combination = ()
         # iterate over bits of this number
         for pos, bit in enumerate((i >> p & 1 for p in xrange(i.bit_length()))):
@@ -75,7 +75,7 @@ def xcombinations_gray(items):
     """
     Generate all possible 2^n - 1 combinations using Gray code.
     """
-    for i in xrange(1, 2**len(items)):
+    for i in xrange(1, 2 ** len(items)):
         combination = ()
         # convert to Gray code
         i ^= i >> 1
@@ -84,6 +84,17 @@ def xcombinations_gray(items):
             if bit == 1:
                 combination += (items[pos],)
         yield combination
+
+
+def xcombinations_prefix(items, prefix=(), start=0):
+    """
+    Generate combinations of given length using prefix recurrence
+    """
+    for i in range(start, len(items)):
+        combination = prefix + (items[i],)
+        yield combination
+        for c in xcombinations_prefix(items, combination, i + 1):
+            yield c
 
 
 if __name__ == '__main__':
@@ -97,4 +108,6 @@ if __name__ == '__main__':
     assert len(list(combinations_3k(seq))) == factorial(n) / (factorial(k) * factorial(n - k))
     assert len(list(xcombinations_lex(seq, 3))) == len(list(combinations_3k(seq)))
     assert len(combinations_lex(seq, 3)) == len(list(combinations_3k(seq)))
-    assert set(list(xcombinations_bin(seq))) == set(list(xcombinations_gray(seq))) == set(list(xcombinations_lex_all(seq)))
+    assert set(list(xcombinations_bin(seq))) == set(list(xcombinations_gray(seq))) == set(
+        list(xcombinations_lex_all(seq)))
+    assert len(list(xcombinations_prefix(seq))) == 15

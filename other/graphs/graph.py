@@ -63,6 +63,7 @@ class Graph(object):
     """
     def __init__(self, vertex_class=Vertex):
         self.vertices = OrderedDict()
+        self.edges = []
         self.vertex_class = vertex_class
 
     def add_edge(self, name1, name2):
@@ -81,6 +82,7 @@ class Graph(object):
         edge = Edge(vertex1, vertex2)
         vertex1.outgoing.append(edge)
         vertex2.incoming.append(edge)
+        self.edges.append(edge)
 
     def __getitem__(self, vertex_name):
         """
@@ -99,6 +101,9 @@ class Graph(object):
 
     def __iter__(self):
         return self.vertices.itervalues()
+
+    def iteredges(self):
+        return iter(self.edges)
 
     def __reversed__(self):
         return reversed(self.vertices)
@@ -128,3 +133,4 @@ class EdgeWeightedGraph(Graph):
         edge = EdgeWeighted(vertex1, vertex2, weight)
         vertex1.outgoing.append(edge)
         vertex2.incoming.append(edge)
+        self.edges.append(edge)
