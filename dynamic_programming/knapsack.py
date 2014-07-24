@@ -126,10 +126,10 @@ class RobberyDP(object):
         # add an empty knapsack by default
         # it will be used if no items are added at the next step
         knapsacks = [Knapsack()]
-        for item in self.items:
+        for i, item in enumerate(self.items):
             # filter items which still can be put into the knapsack
-            if item.weight <= weight and item not in used:
-                knapsack = self.knapsack(weight - item.weight, used | frozenset([item])).copy()
+            if item.weight <= weight and i not in used:
+                knapsack = self.knapsack(weight - item.weight, used | frozenset([i])).copy()
                 knapsack.add(item)
                 knapsacks.append(knapsack)
         return max(knapsacks)
@@ -271,6 +271,24 @@ class RobberyMIM(object):
         return best
 
 
+def knapsack_memo(items, weight):
+    """
+    Memory efficient solution: it takes only O(W) space and returns the max value of the knapsack,
+    but does not track the set of items in the knapsack.
+    The running time is still O(nW).
+    We may improve this algorithm further by sorting the items in the weight decreasing order and stop
+    iteration when is does not make sense. But this condition is intricate.
+    """
+    # we don't use a dictionary here since it may cause a MemoryError on a huge input
+    table = [0] * (weight + 1)
+    for i, item in enumerate(items):
+        for w in xrange(weight, item.weight - 1, -1):
+            if item.weight <= w:
+                table[w] = max(table[w], table[w - item.weight] + item.value)
+
+    return table[weight]
+
+
 if __name__ == '__main__':
     items = (Item(6, 30), Item(3, 14), Item(4, 16), Item(2, 9))
     robbery = RobberyDP(items)
@@ -284,3 +302,4 @@ if __name__ == '__main__':
     robbery = RobberyBB(items)
     bag4 = robbery.knapsack(10)
     assert all([i in bag4 for i in bag3]) and len(bag3) == len(bag4)
+    assert knapsack_memo(items, 10) == 46

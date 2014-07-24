@@ -54,13 +54,13 @@ def memoize(func):
     """
     Simple memoization decorator (it does not handle kwargs since we don't need them)
     """
-    cache = dict()
 
     def wrapper(*args):
-        if args not in cache:
-            cache[args] = func(*args)
-        return cache[args]
+        if args not in wrapper.cache:
+            wrapper.cache[args] = func(*args)
+        return wrapper.cache[args]
 
+    wrapper.cache = dict()
     return wrapper
 
 
