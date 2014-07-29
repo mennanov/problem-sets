@@ -125,9 +125,12 @@ class DijkstraSP(object):
         Get the full path from starting vertex to that one
         """
         path = []
-        while v != self.start.name:
-            path.append(self.graph[v])
-            v = self.prev[v.name].name
+        v = self.graph[v]
+        while v != self.start:
+            path.append(v)
+            v = self.prev[v.name]
+
+        path.append(self.start)
         return reversed(path)
 
 

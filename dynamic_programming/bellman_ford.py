@@ -25,6 +25,8 @@ class BellmanFord(object):
         n = len(self.graph)
         # we run the algorithm n times to be able to detect negative cycles in the last iteration
         for i in xrange(n + 1):
+            # how many paths were modified during the iteration (early stopping optimization)
+            modified = 0
             for vertex in self.graph:
                 # iterate over every incoming edge of this vertex
                 for edge in vertex.incoming:
@@ -35,6 +37,10 @@ class BellmanFord(object):
                         # shorter path is found: update dist and prev
                         self.dist[vertex.name] = edge.weight + self.dist[edge.vertex_from.name]
                         self.prev[vertex.name] = edge.vertex_from
+                        modified += 1
+            if modified == 0:
+                # if nothing was improved during the iteration - terminate
+                break
 
     def path_to(self, vertex_name):
         """
@@ -54,7 +60,7 @@ if __name__ == '__main__':
 
     edges = [
         ('s', 'v', 2),
-        ('x', 's', -3),
+        ('s', 'x', 4),
         ('v', 'w', 2),
         ('x', 't', 4),
         ('v', 'x', 1),
