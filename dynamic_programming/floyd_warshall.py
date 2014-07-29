@@ -72,13 +72,9 @@ if __name__ == '__main__':
         ('w', 't', 3),
     ]
     graph = EdgeWeightedGraph()
-
-    with open('g1.txt', 'r') as fp:
-        header = fp.readline()
-        for line in fp:
-            data = line.split()
-            graph.add_edge(int(data[0]), int(data[1]), int(data[2]))
+    for edge in edges:
+        graph.add_edge(edge[0], edge[1], edge[2])
 
     fw = FloydWarshall(graph)
     fw.run()
-    print fw.min_dist
+    assert fw.dist['s']['t'] == 7
