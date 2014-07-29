@@ -283,8 +283,7 @@ def knapsack_memo(items, weight):
     table = [0] * (weight + 1)
     for i, item in enumerate(items):
         for w in xrange(weight, item.weight - 1, -1):
-            if item.weight <= w:
-                table[w] = max(table[w], table[w - item.weight] + item.value)
+            table[w] = max(table[w], table[w - item.weight] + item.value)
 
     return table[weight]
 
