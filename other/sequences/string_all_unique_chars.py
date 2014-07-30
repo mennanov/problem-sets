@@ -17,7 +17,7 @@ def all_unique_list(string):
     Running time is O(N), space is O(R) where R is a length of an alphabet.
     """
     # assume we have an ASCII string
-    r = 256
+    r = 65535 if isinstance(string, unicode) else 255
     if len(string) > r:
         return False
 
