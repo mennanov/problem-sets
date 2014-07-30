@@ -56,10 +56,12 @@ def memoize(func):
     """
 
     def wrapper(*args):
+        wrapper.calls += 1
         if args not in wrapper.cache:
             wrapper.cache[args] = func(*args)
         return wrapper.cache[args]
 
+    wrapper.calls = 0
     wrapper.cache = dict()
     return wrapper
 

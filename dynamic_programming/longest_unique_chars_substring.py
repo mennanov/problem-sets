@@ -11,6 +11,7 @@ class Substring(object):
     def __init__(self, value=''):
         self.value = value
         self.chars = set(value)
+        # mutability flag: helps to build a substring, not a subsequence
         self.mutable = True
         self.length = len(self.value)
 
@@ -59,13 +60,15 @@ class Substring(object):
 class LongestUniqueSubstring(object):
     """
     Dynamic programming approach.
-    Apparently O(N) space and time.
+    Running time and space is O(N^2) (not sure about it though).
+    This algorithm can be used for any value of k.
+    Also it can be easily modified to return a subsequence (not a substring): just
+    remove the "mutability" feature in a Substring class.
     """
 
     def __init__(self, string, limit):
         self.string = string
         self.limit = limit
-
 
     @memoize
     def run(self, i=0, j=None):
@@ -88,7 +91,73 @@ class LongestUniqueSubstring(object):
         return max(case1, case2, case3)
 
 
+def lsotuc(string):
+    """
+    Longest substring of two unique characters.
+    It uses iterative approach and runs in O(N) with O(1) space.
+    """
+    # length, first char, last char
+    longest_substring = (0, 0, 0)
+    # pointer to the first occurrence of the first string
+    a_first = 0
+    # pointer to the second unique (not necessary last) occurrence of the first string
+    a_second = 0
+    # pointer to the first occurrence of the second string
+    b_first = None
+    # pointer to the second unique (not necessary last) occurrence of the second string
+    b_second = None
+    # change pointers flags
+    change_a = False
+    change_b = False
+    for i in xrange(1, len(string)):
+        if string[i] == string[a_first]:
+            if change_a:
+                a_second = i
+                change_b = True
+                change_a = False
+        elif b_first is None:
+            b_first = i
+            b_second = i
+            change_a = True
+        elif string[i] == string[b_first]:
+            if change_b:
+                b_second = i
+                change_a = True
+                change_b = False
+        else:
+            start = min(a_first, b_first)
+            end = i
+            length = end - start
+            if length > longest_substring[0]:
+                # update the longest substring
+                longest_substring = (length, start, end)
+
+            # third character found
+            if a_second > b_second:
+                a_first = a_second
+                b_first = b_second = i
+                change_a = True
+                change_b = False
+            else:
+                b_first = b_second
+                a_first = a_second = i
+                change_b = True
+                change_a = False
+
+    # check for the longest substring at the end of the cycle
+    start = min(a_first, b_first)
+    end = i + 1
+    length = end - start
+    if length > longest_substring[0]:
+        # update the longest substring
+        longest_substring = (length, start, end)
+
+    return string[longest_substring[1]:longest_substring[2]]
+
+
 if __name__ == '__main__':
-    s = 'JBEEVRVCFYHRKMRFPZWTBKBEAFPNDNMPFDPEJGWMOUBOMRDZHOHMOSJZHJOTZSHLOBXAQKCYKNNBCVMLXFOMABEZJHCOWHNRQZYVZKPRBKQNAMYBRGARTXAJMORWERIGLCNYXNXOMKYJKUFBTKTLOFQIZXYPKUFPGWBWWKANXSWTHUXIBGOSAJXPWHNLNZAXAZTQVKVISNKTYWECFOYBCIUMOQDAMHHOWVXBZWARUQCRGLOCGEJPGFFMGPDYQLIPDNOJBNFOYDJUVXHBJQHAAJBDYMUULIWZLWIHYMQEHODAJRPJLCTJMJVOIOFGCMBCVHGSGLZDYD'
-    lucs = LongestUniqueSubstring(s, 5)
-    assert str(lucs.run()) == 'FPNDNMPFDP'
+    # it will hit the max recursion limit on input length > 330
+    s = 'G4W1HTOYNY1KECQ8C4N3T3ASYS8E6YRFNJQ0Q63UMC96W7K2IJ2ZBV7Q3UIUA1PE3I9MLIZS8SLQFGWCG1PUKFTVZT3VF5EFEFUJ4VQD9IWBDBR3SBQKPJYLWL5EL7HGNBJJCB1RO0FE054OCMBR9GK9X7B2J4EIGYVQGXLO8QR43TQN3BK8HDVA07WIO8KZ02QR84EFHVE9W2W0KOGBCGA58OQLOJHGLHAV62JZ9R7KCH783J0OE943S2R50HY2H0QMZFQRXBFMW9VKWE19PDG660BK2Y4189Q9PH89NNRVEYBS3D3KRZ9KTXHO7QRBGL1TLWV0C3'
+    lucs = LongestUniqueSubstring(s, 2)
+    assert str(lucs.run()) == 'EFEF'
+    assert lsotuc(s) == 'EFEF'
