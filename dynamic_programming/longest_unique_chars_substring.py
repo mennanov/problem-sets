@@ -4,6 +4,7 @@
 Goal: Find the substring containing only k unique characters that has maximum length.
 For example for the string "ABBCA" and k=2 it can be "ABB" or "BBC"
 """
+import re
 from graph_shortest_path import memoize
 
 
@@ -155,9 +156,21 @@ def lsotuc(string):
     return string[longest_substring[1]:longest_substring[2]]
 
 
+def lsotuc_re(s):
+    """
+    Tricky approach using regular expressions.
+    Not sure about the running time, but is very close to O(N).
+    Although it works for k=2 only it can be extended to search for any value of k,
+    but in this case we will need to generate an appropriate regular expression.
+    """
+    pat = re.compile(r'(.)\1*(.)(\1|\2)*', re.DOTALL)
+    return max((pat.search(s, i).group() for i in range(len(s) - 1)), key=len)
+
+
 if __name__ == '__main__':
     # it will hit the max recursion limit on input length > 330
     s = 'G4W1HTOYNY1KECQ8C4N3T3ASYS8E6YRFNJQ0Q63UMC96W7K2IJ2ZBV7Q3UIUA1PE3I9MLIZS8SLQFGWCG1PUKFTVZT3VF5EFEFUJ4VQD9IWBDBR3SBQKPJYLWL5EL7HGNBJJCB1RO0FE054OCMBR9GK9X7B2J4EIGYVQGXLO8QR43TQN3BK8HDVA07WIO8KZ02QR84EFHVE9W2W0KOGBCGA58OQLOJHGLHAV62JZ9R7KCH783J0OE943S2R50HY2H0QMZFQRXBFMW9VKWE19PDG660BK2Y4189Q9PH89NNRVEYBS3D3KRZ9KTXHO7QRBGL1TLWV0C3'
     lucs = LongestUniqueSubstring(s, 2)
     assert str(lucs.run()) == 'EFEF'
     assert lsotuc(s) == 'EFEF'
+    assert lsotuc_re(s) == 'EFEF'
