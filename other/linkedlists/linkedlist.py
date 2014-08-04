@@ -55,26 +55,26 @@ class LinkedList(object):
             yield node
             node = node.next_node
 
-    def _get_nodes_pair(self, i):
+    def _get_nodes_pair(self, index):
         """
         Get the node and its previous sibling node by its index.
         Runs in O(N) time.
         """
         node = None
         prev_node = None
-        if i < 0:
+        if index < 0:
             # support negative indexes
-            i += len(self)
+            index += len(self)
         c = 0
         for c, node in enumerate(self.iternodes()):
-            if c >= i:
+            if c >= index:
                 break
             else:
                 prev_node = node
-        if i == c and node:
+        if index == c and node:
             return node, prev_node
         else:
-            raise IndexError(i)
+            raise IndexError(index)
 
     def _get_node(self, i):
         return self._get_nodes_pair(i)[0]
