@@ -46,7 +46,6 @@ def is_palindrome_stack_optimized(linked_list):
     # at that moment the slow pointer points at the middle of the list
     while slow:
         if slow.value != stack.pop():
-            print slow.value
             return False
         slow = slow.next_node
 
