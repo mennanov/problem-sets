@@ -7,10 +7,9 @@ before he returns home. Given the pairwise distances between cities, what is the
 in which to visit them, so as to minimize the overall distance traveled?
 """
 import math
-from collections import defaultdict
+from array import array
 from other.graphs.graph import EdgeWeightedGraph
 from graph_shortest_path import Path, memoize
-from combinatorics.generate_combinations import xcombinations_bin, xcombinations_lex
 
 
 class TSPDP(object):
@@ -108,7 +107,7 @@ class TSP(object):
         self.graph = graph
         # 2-d array of distances for set of vertices and the destination vertex
         self.dist = [None] * (2 ** len(self.graph))
-        # startint point
+        # starting point
         self.start = start_name
         # vertices keys
         self.vertices = self.graph.vertices.keys()
@@ -133,11 +132,11 @@ class TSP(object):
         # fill in the base cases when the destination is the source vertex
         for s in self._int_combinations(len(self.vertices)):
             if s == (1 << self.start):
-                self.dist[s] = [0] + [float('inf')] * (len(self.vertices) - 1)
+                self.dist[s] = array('f', [0] + [float('inf')] * (len(self.vertices) - 1))
             elif s == 0:
-                self.dist[s] = [0] * len(self.vertices)
+                self.dist[s] = array('f', [0] * len(self.vertices))
             else:
-                self.dist[s] = [float('inf')] * len(self.vertices)
+                self.dist[s] = array('f', [float('inf')] * len(self.vertices))
 
         for m in xrange(1, len(self.graph) + 1):
             for s in self._vertices_combinations(m):
