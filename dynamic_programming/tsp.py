@@ -42,11 +42,11 @@ class TSPDP(object):
         # the best possible path so far
         best = Path(float('inf'))
         # run depth-first search from the start vertex
-        for v, weight in self.graph[start].outgoing:
-            if v.name not in visited:
-                path = self.path(source, v.name, visited | frozenset([v.name])).copy()
+        for edge in self.graph[start].outgoing:
+            if edge.vertex_to.name not in visited:
+                path = self.path(source, edge.vertex_to.name, visited | frozenset([edge.vertex_to.name])).copy()
                 # add the current edge to that path
-                path.add(v, weight)
+                path.add(edge.vertex_to, edge.weight)
                 if path < best:
                     best = path
         # return the shortest path
@@ -87,11 +87,11 @@ class TSPBF(object):
         if visited is None:
             visited = frozenset()
         # run depth-first search from the start vertex
-        for v, weight in self.graph[start].outgoing:
-            if v.name not in visited:
-                for subpath in self._dfs(source, v.name, visited | frozenset([v.name])):
+        for edge in self.graph[start].outgoing:
+            if edge.vertex_to.name not in visited:
+                for subpath in self._dfs(source, edge.vertex_to.name, visited | frozenset([edge.vertex_to.name])):
                     # add the current edge to that path
-                    subpath.add(v, weight)
+                    subpath.add(edge.vertex_to, edge.weight)
                     yield subpath
 
 
@@ -162,32 +162,24 @@ class TSP(object):
 
 
 if __name__ == '__main__':
-    # edges = [('a', 'b', 2), ('a', 'c', 2), ('a', 'd', 1), ('a', 'e', 4), ('b', 'c', 3),
-    #          ('b', 'e', 3), ('b', 'd', 2), ('c', 'd', 2), ('c', 'e', 2), ('e', 'd', 4)]
-    # graph = EdgeWeightedGraph()
-    # for edge in edges:
-    #     graph.add_edge(edge[0], edge[1], edge[2])
-    #     # backward edge since graph is undirected
-    #     graph.add_edge(edge[1], edge[0], edge[2])
-    # tsp_dp = TSPDP(graph)
-    # tsp_bf = TSPBF(graph)
-    # assert tsp_dp.path('a') == tsp_bf.path('a')
+    edges = [('a', 'b', 2), ('a', 'c', 2), ('a', 'd', 1), ('a', 'e', 4), ('b', 'c', 3),
+             ('b', 'e', 3), ('b', 'd', 2), ('c', 'd', 2), ('c', 'e', 2), ('e', 'd', 4)]
     graph = EdgeWeightedGraph()
-    points = []
-    with open('tsp.txt', 'r') as fp:
-        header = fp.readline()
-        for line in fp:
-            point = line.split()
-            points.append((float(point[0]), float(point[1])))
-
-    for i, p1 in enumerate(points):
-        for j, p2 in enumerate(points):
-            if i != j:
-                dist = math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
-                graph.add_edge(i, j, dist)
-                # graph.add_edge(j, i, dist)
+    for edge in edges:
+        graph.add_edge(edge[0], edge[1], edge[2])
+        # backward edge since graph is undirected
+        graph.add_edge(edge[1], edge[0], edge[2])
+    tsp_dp = TSPDP(graph)
+    tsp_bf = TSPBF(graph)
+    assert tsp_dp.path('a') == tsp_bf.path('a')
+    graph = EdgeWeightedGraph()
+    edges = [(0, 1, 0.9730878685915265), (0, 2, 2.0461915843830463), (0, 3, 1.2525573839150046),
+             (0, 4, 0.6685057965343308), (1, 0, 0.9730878685915265), (1, 2, 2.23606797749979),
+             (1, 3, 2.0716177253537875), (1, 4, 1.0), (2, 0, 2.0461915843830463), (2, 1, 2.23606797749979),
+             (2, 3, 1.54), (2, 4, 1.4142135623730951), (3, 0, 1.2525573839150046), (3, 1, 2.0716177253537875),
+             (3, 2, 1.54), (3, 4, 1.1364858116140297), (4, 0, 0.6685057965343308), (4, 1, 1.0),
+             (4, 2, 1.4142135623730951), (4, 3, 1.1364858116140297)]
+    for edge in edges:
+        graph.add_edge(edge[0], edge[1], edge[2])
     tsp = TSP(graph, 0)
-    print tsp.run()
-
-
-
+    assert tsp.run() == 6.1798587655
