@@ -6,7 +6,8 @@ from collections import defaultdict
 
 class Papadimitriou(object):
     """
-
+    2-SAT Papadimitriou's randomized algorithm which runs O(N^2LogN) and answers the satisfiability request
+    with 1 - 1/n probability, where n is the number of variables.
     """
 
     def __init__(self, clauses, vars):
@@ -28,7 +29,9 @@ class Papadimitriou(object):
 
     def preprocess(self):
         """
-        Remove clauses which don't make sense
+        Remove clauses which don't make sense.
+        It may significantly improve the running time of the algorithm because it may decently shrink the input
+        data: ex., for 600000 clauses this preprocessing step may shrink it to just 11!
         """
         while True:
             delete = []
@@ -38,6 +41,10 @@ class Papadimitriou(object):
                 if always_positive:
                     # remove these clauses and this variable
                     self.clauses -= clauses
+                    # remove the neighbour matches
+                    for c in clauses:
+                        neighbour = abs(c[0]) if var == abs(c[1]) else abs(c[1])
+                        self.matches[neighbour].remove(c)
                     delete.append(var)
                     continue
 
@@ -46,6 +53,10 @@ class Papadimitriou(object):
                 if always_negative:
                     # remove these clauses and this variable
                     self.clauses -= clauses
+                    # remove the neighbour matches
+                    for c in clauses:
+                        neighbour = abs(c[0]) if var == abs(c[1]) else abs(c[1])
+                        self.matches[neighbour].remove(c)
                     delete.append(var)
 
             if delete:
@@ -56,40 +67,42 @@ class Papadimitriou(object):
 
     def run(self):
         n = len(self.vars)
-        for _ in xrange(2 * int(math.log(n, 2))):
+        for _ in xrange(int(math.log(n, 2))):
             # choose random initial assignment
             for i in xrange(1, n):
                 self.vars[i] = random.choice([True, False])
 
             # evaluate each clause
             failed = self._solve(self.clauses)
-            # print 'start local search', self.vars
+            # as in classical Papadimitriou's algorithm we repeat 2 * n ^ 2 times to be able to report
+            # unsatisfiability of the data in the end if solution is still not found
             counter = 0
             while failed and counter < 2 * n ^ 2:
-                # print 'failed: ', failed, len(failed)
-                # flip random variable in a random failed clause and repeat local search on the corresponding clauses
+                # pick a random failed clause and repeat local search on the clauses
+                # which were affected by flipping the variable
                 clause = random.choice(tuple(failed))
                 proceed = True
                 for var in clause:
+                    # flip each variable in a clause
                     if proceed:
                         var = abs(var)
-                        # print 'flip', var, 'to', not self.vars[var]
+                        # flip the value of a variable
                         self.vars[var] = not self.vars[var]
                         # iterate over involved clauses
                         failed_involved = self._solve(self.matches[var])
-
                         if failed_involved:
                             # add new failed clauses
-                            # print 'flip not helped', var, failed_involved, len(failed_involved)
                             failed |= failed_involved
                         else:
                             # conflict with this particular variable is resolved
-                            # print 'resolved conflicts for', var
                             failed -= self.matches[var]
                             proceed = False
                 counter += 1
             if not failed:
+                # we have no failed clauses: all of them resolve to True
                 return True
+        # we could not find the solution within 2 * n ^ 2 steps: report that solution does not exist
+        # with probability 1 - 1/n (so it may be wrong in rare cases).
         return False
 
     def _solve(self, clauses):
@@ -100,13 +113,13 @@ class Papadimitriou(object):
         for clause in clauses:
             v1 = self.vars[clause[0]] if clause[0] > 0 else not self.vars[abs(clause[0])]
             v2 = self.vars[clause[1]] if clause[1] > 0 else not self.vars[abs(clause[1])]
-            if not(v1 or v2):
+            if not (v1 or v2):
                 failed.add(clause)
         return failed
 
+
 if __name__ == '__main__':
-    import sys
-    with open(sys.argv[1]) as fp:
+    with open('2sat.txt') as fp:
         n = int(fp.readline())
         clauses = set()
         for i, line in enumerate(fp):
@@ -115,5 +128,4 @@ if __name__ == '__main__':
 
         p = Papadimitriou(clauses, [None] * (n + 1))
         p.preprocess()
-        print len(p.clauses)
-        # print p.run()
+        assert p.run()
