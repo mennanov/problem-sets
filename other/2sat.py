@@ -26,6 +26,34 @@ class Papadimitriou(object):
             matches[abs(c[1])].add(c)
         return matches
 
+    def preprocess(self):
+        """
+        Remove clauses which don't make sense
+        """
+        while True:
+            delete = []
+            for var, clauses in self.matches.iteritems():
+                # check if this variable is always positive (not negated)
+                always_positive = all(c[0] == var or c[1] == var for c in clauses)
+                if always_positive:
+                    # remove these clauses and this variable
+                    self.clauses -= clauses
+                    delete.append(var)
+                    continue
+
+                # check if this variable is always negative
+                always_negative = all(c[0] == -var or c[1] == -var for c in clauses)
+                if always_negative:
+                    # remove these clauses and this variable
+                    self.clauses -= clauses
+                    delete.append(var)
+
+            if delete:
+                for d in delete:
+                    del self.matches[d]
+            else:
+                break
+
     def run(self):
         n = len(self.vars)
         for _ in xrange(2 * int(math.log(n, 2))):
@@ -40,7 +68,7 @@ class Papadimitriou(object):
             while failed and counter < 2 * n ^ 2:
                 # print 'failed: ', failed, len(failed)
                 # flip random variable in a random failed clause and repeat local search on the corresponding clauses
-                clause = random.sample(failed, 1)[0]
+                clause = random.choice(tuple(failed))
                 proceed = True
                 for var in clause:
                     if proceed:
@@ -65,6 +93,9 @@ class Papadimitriou(object):
         return False
 
     def _solve(self, clauses):
+        """
+        Evaluate the given expressions and return failed ones.
+        """
         failed = set()
         for clause in clauses:
             v1 = self.vars[clause[0]] if clause[0] > 0 else not self.vars[abs(clause[0])]
@@ -77,10 +108,12 @@ if __name__ == '__main__':
     import sys
     with open(sys.argv[1]) as fp:
         n = int(fp.readline())
-        clauses = []
+        clauses = set()
         for i, line in enumerate(fp):
             data = line.split()
-            clauses.append((int(data[0]), int(data[1])))
+            clauses.add((int(data[0]), int(data[1])))
 
         p = Papadimitriou(clauses, [None] * (n + 1))
-        print p.run()
+        p.preprocess()
+        print len(p.clauses)
+        # print p.run()
