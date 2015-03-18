@@ -25,7 +25,6 @@ def power_fast(number, pow):
         return result
     else:
         return result * number
-    return result
 
 
 if __name__ == '__main__':
