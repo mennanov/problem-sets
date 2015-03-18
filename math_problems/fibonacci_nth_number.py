@@ -31,9 +31,12 @@ class Matrix(list):
 
 def exp(operand, e):
     """
-    Exponentiation by squaring.
+    Exponentiation by squaring. O(LogN) complexity.
     """
-    if e == 1:
+    if e < 0:
+        # special case
+        return 1 / exp(operand, -e)
+    elif e == 1:
         return operand
     r = exp(operand, e / 2)
     result = r * r
@@ -47,6 +50,8 @@ def fib(n):
     """
     Fibonacci sequence n-th number in O(LogN) time.
     """
+    if n < 2:
+        return n
     return exp(Matrix([[1, 1], [1, 0]]), n - 1)[0][0]
 
 
